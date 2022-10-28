@@ -1,0 +1,4 @@
+{
+  "unique-slug.placeholder": "eg. my-custom-slug",
+  "unique-slug.invalid-slug": "This value is already used"
+}

@@ -1,0 +1,40 @@
+{
+  "name": "@sklinet/strapi-plugin-unique-slug-field",
+  "version": "1.0.0",
+  "description": "Add unique Slug field to your Strapi application.",
+  "private": false,
+  "keywords": [
+    "strapi",
+    "slug",
+    "field",
+    "slug-field",
+    "custom-field"
+  ],
+  "strapi": {
+    "name": "unique-slug-field",
+    "description": "Add unique Slug field to your Strapi application.",
+    "kind": "plugin",
+    "displayName": "Unique Slug Field"
+  },
+  "dependencies": {
+    "@sindresorhus/slugify": "^2.1.1"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^4.0.0"
+  },
+  "author": {
+    "name": "SKLINET s.r.o.",
+    "url": "https://github.com/SKLINET"
+  },
+  "maintainers": [
+    {
+      "name": "SKLINET s.r.o.",
+      "url": "https://github.com/SKLINET"
+    }
+  ],
+  "engines": {
+    "node": ">=14.x.x <=16.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT"
+}
