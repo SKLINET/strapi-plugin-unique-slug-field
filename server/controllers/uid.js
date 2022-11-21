@@ -37,22 +37,27 @@ module.exports = {
     const entity = id
       ? await strapi.service(uid).findOne(id)
       : await strapi.service(uid).find();
+    if (entity) {
+      console.log("sending uid");
+      const referenceValue = entity[supportedType.references];
+      const uniqueValue = slug;
+      const vuid = entity?.vuid || "";
+      const field = supportedType.field;
 
-    const referenceValue = entity[supportedType.references];
-    const uniqueValue = slug;
-    const vuid = entity.vuid || "";
-    const field = supportedType.field;
+      // Return empty object if requirements are not met.
+      if (!supportedType || !entity) {
+        return ctx.send({});
+      }
 
-    // Return empty object if requirements are not met.
-    if (!supportedType || !entity) {
-      return ctx.send({});
+      ctx.send({
+        value: slug
+          ? await findUniqueUID(uid, field, uniqueValue, vuid)
+          : referenceValue,
+        vuid: vuid,
+      });
+    } else {
+      console.log("not sending uid");
+      ctx.send({});
     }
-
-    ctx.send({
-      value: slug
-        ? await findUniqueUID(uid, field, uniqueValue, vuid)
-        : referenceValue,
-      vuid: entity.vuid,
-    });
   },
 };

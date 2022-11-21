@@ -8,7 +8,8 @@ module.exports = {
       path: "/uid/:uid/:id/:slug",
       handler: "uid.findOne",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: [],
+        auth: false,
       },
     },
     {
@@ -16,7 +17,8 @@ module.exports = {
       path: "/uid/:uid/:id",
       handler: "uid.findOne",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: [],
+        auth: false,
       },
     },
     {
@@ -24,7 +26,8 @@ module.exports = {
       path: "/uid/:uid",
       handler: "uid.findOne",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: [],
+        auth: false,
       },
     },
   ],

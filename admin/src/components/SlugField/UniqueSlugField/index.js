@@ -22,15 +22,17 @@ const UniqueSlugField = ({
   intlLabel,
   labelAction,
   name,
+  disabled,
   onChange,
   required,
   value,
   contentTypeUID,
+  ...rest
 }) => {
   const [slugValue, setSlugValue] = useState(value);
   const [vuid, setVuid] = useState(null);
   const [sameVuid, setSameVuid] = useState(true);
-  const [isValid, setIsValid] = useState();
+  const [isValid, setIsValid] = useState(null);
   const { formatMessage } = useIntl();
 
   // Get content type ID from path
@@ -41,30 +43,33 @@ const UniqueSlugField = ({
 
   // Fetch field value on page load
   useEffect(() => {
-    const fetchVuid = async () => {
-      const data = await axiosInstance.get(
-        `/unique-slug-field/vuid/${contentTypeUID}/${id}`
-      );
-      if (data) {
-        setVuid(data.data.vuid);
-      }
-    };
-    fetchVuid().catch((e) => console.log(e));
+    if (value) {
+      setSlugValue(value);
+      axiosInstance
+        .get(`/unique-slug-field/vuid/${contentTypeUID}/${id}`)
+        .then(({ data }) => {
+          setVuid(data);
+        });
+    }
 
     if (!value) {
-      const fetchData = async () => {
-        const data = await axiosInstance.get(
-          `/unique-slug-field/uid/${contentTypeUID}/${id}/${slugValue}`
-        );
-        setSlugValue(slugify(data.data.value));
-        data.data.vuid === vuid ? setSameVuid(true) : setSameVuid(false);
-      };
-      fetchData().catch((e) => console.log(e));
+      axiosInstance
+        .get(`/unique-slug-field/uid/${contentTypeUID}/${id}`)
+        .then(({ data }) => {
+          if (data.value) {
+            setSlugValue(slugify(data.value));
+          } else setSlugValue("");
+        });
     }
   }, []);
 
   // Watch for changes in slugValue, and update value based on slugValues value
   useEffect(() => {
+    axiosInstance
+      .get(`/unique-slug-field/vuid/${contentTypeUID}/${id}`)
+      .then(({ data }) => {
+        setVuid(data);
+      });
     onChange({
       target: {
         name,
@@ -73,6 +78,19 @@ const UniqueSlugField = ({
       },
     });
   }, [slugValue]);
+
+  // // Watch for availability of the value
+  // useEffect(() => {
+  //   if (!isValid) {
+  //     onChange({
+  //       target: {
+  //         name,
+  //         value: "",
+  //         type: attribute.type,
+  //       },
+  //     });
+  //   }
+  // }, [isValid]);
 
   return (
     <Field name={name} id={name} error={error}>
@@ -91,39 +109,49 @@ const UniqueSlugField = ({
                   defaultMessage: "your-slug-text",
                 })}
                 value={slugValue}
-                onChange={async (e) => {
+                onChange={(e) => {
                   setSlugValue(slugify(e.target.value));
                   if (e.target.value) {
-                    const isAvailable = await axiosInstance.get(
-                      `/unique-slug-field/available/${contentTypeUID}/${e.target.value}`
-                    );
-
-                    if (isAvailable.data) {
-                      setIsValid(isAvailable.data.available);
-                      setSameVuid(isAvailable.data.vuid === vuid);
-                    }
+                    axiosInstance
+                      .get(
+                        `/unique-slug-field/available/${contentTypeUID}/${
+                          e.target.value
+                        }/${id}${vuid ? `/${vuid}` : ""}`
+                      )
+                      .then(({ data }) => {
+                        setIsValid(
+                          data.vuid === vuid ? true : data?.available || false
+                        );
+                        setSameVuid(data?.vuid === vuid);
+                      });
                   }
                 }}
               />
             </Stack>
           </Field>
           <IconButton
-            onClick={async () => {
-              const data = await axiosInstance.get(
-                `/unique-slug-field/uid/${contentTypeUID}/${id}/${slugValue}`
-              );
-              if (data.data.value) {
-                const isAvailable = await axiosInstance.get(
-                  `/unique-slug-field/available/${contentTypeUID}/${data.data.value}`
-                );
-                if (isAvailable.data.available) {
-                  setSlugValue(data.data.value);
-                  setSameVuid(isAvailable.data.viud === vuid);
-                } else {
-                  setSlugValue(slugify(data.data.value + "-1"));
-                  setSameVuid(data.data.viud === vuid);
-                }
-              }
+            onClick={() => {
+              axiosInstance
+                .get(
+                  `/unique-slug-field/uid/${contentTypeUID}/${id}/${slugValue}`
+                )
+                .then(({ data }) => {
+                  if (data?.value) {
+                    axiosInstance
+                      .get(
+                        `/unique-slug-field/available/${contentTypeUID}/${data.value}/${id}`
+                      )
+                      .then((available) => {
+                        if (available?.data?.available) {
+                          setSlugValue(data.value);
+                          setSameVuid(available?.data?.vuid === vuid);
+                        } else {
+                          setSlugValue(slugify(data.value + "-1"));
+                          setSameVuid(data.viud === vuid);
+                        }
+                      });
+                  }
+                });
             }}
             icon={<Refresh />}
             noBorder={true}
@@ -131,14 +159,14 @@ const UniqueSlugField = ({
           <FieldHint />
           <FieldError />
         </Flex>
-        {/* {slugValue && !isValid && !sameVuid && (
+        {!isValid && !sameVuid && (
           <Typography variant="pi" fontWeight="bold" textColor="danger600">
             {formatMessage({
               id: getTrad("unique-slug.invalid"),
               defaultMessage: "This value is already used",
             })}
           </Typography>
-        )} */}
+        )}
       </Stack>
     </Field>
   );

@@ -8,7 +8,8 @@ module.exports = {
       path: "/vuid/:uid/:id",
       handler: "vuid.getVuid",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: [],
+        auth: false,
       },
     },
   ],

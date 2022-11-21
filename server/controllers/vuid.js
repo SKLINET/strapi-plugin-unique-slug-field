@@ -5,7 +5,12 @@ module.exports = {
     const { uid, id } = ctx.request.params;
 
     const entity = await strapi.service(uid).findOne(id);
-    console.log(entity);
-    ctx.send({ vuid: entity?.vuid });
+    if (entity?.vuid) {
+      console.log("sending vuid");
+      ctx.send(entity?.vuid);
+    } else {
+      console.log("not sending vuid");
+      ctx.send({});
+    }
   },
 };

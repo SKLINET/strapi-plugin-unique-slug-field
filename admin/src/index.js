@@ -21,8 +21,16 @@ export default {
       components: {
         Input: async () =>
           import(
-            /* webpackChunkName: "video-field-input-component" */ "./components/SlugField/UniqueSlugField"
+            /* webpackChunkName: "unique-slug-field-input-component" */ "./components/SlugField/UniqueSlugField"
           ),
+      },
+      options: {
+        validator: (args) => ({
+          returnValue: yup.string().required({
+            id: "unique-slug.required",
+            defaultMessage: "Value is required.",
+          }),
+        }),
       },
     });
   },

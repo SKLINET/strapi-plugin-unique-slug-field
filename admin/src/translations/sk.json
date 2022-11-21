@@ -1,4 +1,5 @@
 {
-  "video-field.placeholder": "napr. moja-url",
-  "unique-slug.invalid-slug": "Táto hodnota je obsadená."
+  "unique-slug.placeholder": "napr. moja-url",
+  "unique-slug.invalid-slug": "Táto hodnota je obsadená.",
+  "unique-slug.required": "Táto hodnota je povinná"
 }
