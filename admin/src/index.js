@@ -26,9 +26,8 @@ export default {
       },
       options: {
         validator: (args) => ({
-          returnValue: yup.string().required({
-            id: "unique-slug.required",
-            defaultMessage: "Value is required.",
+          customSlug: string().test("slug-validation", function (value, ctx) {
+            console.log(value, ctx, args);
           }),
         }),
       },

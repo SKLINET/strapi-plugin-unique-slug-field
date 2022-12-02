@@ -15,6 +15,7 @@ import Refresh from "@strapi/icons/Refresh";
 import { IconButton } from "@strapi/design-system/IconButton";
 import { Flex } from "@strapi/design-system/Flex";
 import { Typography } from "@strapi/design-system/Typography";
+import * as Yup from "yup";
 
 const UniqueSlugField = ({
   attribute,
@@ -34,7 +35,6 @@ const UniqueSlugField = ({
   const [sameVuid, setSameVuid] = useState(true);
   const [isValid, setIsValid] = useState(null);
   const { formatMessage } = useIntl();
-
   // Get content type ID from path
   const id = location.pathname.replace(
     `/admin/content-manager/collectionType/${contentTypeUID}/`,
@@ -92,15 +92,51 @@ const UniqueSlugField = ({
   //   }
   // }, [isValid]);
 
+  const validationFn = (fieldValue) => {
+    const valid = fieldValue === "test";
+    return valid
+      ? {
+          isValid: true,
+        }
+      : {
+          isValid: false,
+          errorMessage: "The value is invalid.",
+        };
+  };
+
+  const getValidationSchema = () => {
+    const schemaObject = {};
+    schemaObject["customSlug"] = Yup.string()
+      .required("This value is required")
+      .test("slugValidation", function (value, ctx) {
+        const validation = validationFn(value);
+        if (!validation.isValid) {
+          return ctx.createError({
+            path: ctx.path,
+            message: validation.errorMessage,
+          });
+        } else {
+          return true;
+        }
+      });
+    return Yup.object().shape(schemaObject);
+  };
+
   return (
-    <Field name={name} id={name} error={error}>
+    <Field
+      name={"customSlug"}
+      id={"custom-slug"}
+      validationSchema={getValidationSchema()}
+      error={error}
+      value={slugValue}
+    >
       <Stack spacing={1}>
         <FieldLabel action={labelAction} required={required}>
           {formatMessage(intlLabel)}
         </FieldLabel>
 
         <Flex gap={1}>
-          <Field name="custom-slug">
+          <Field>
             <Stack spacing={1}>
               <FieldInput
                 type="text"
